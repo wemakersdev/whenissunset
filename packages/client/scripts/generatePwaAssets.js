@@ -44,7 +44,7 @@ const generateAssets = async () => {
 			pathOverride: PATH_OVERRIDE,
 			index: INDEX_HTML,
 			maskable: false,
-			padding: 4,
+			padding: 0,
 		});
 }
 

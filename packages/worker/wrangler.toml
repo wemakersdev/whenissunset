@@ -1,9 +1,9 @@
-name = "worker-typescript-template"
+name = "whenisthesunset"
 type = "javascript"
-zone_id = "dc266d5d5ddaf8dfa8d3af6007d6f886"
+zone_id = "a16c64615888c529b3a07504d818518d"
 account_id = "dd7ff4ee0a586c3497954beb8207ba0c"
 compatibility_date = "2022-05-28"
-route = { pattern = "*domain.com/*", zone_id = "e2f8520a000382c1c0b71efd4a22882a" }
+route = { pattern = "*whenisthesunset.com/*", zone_id = "a16c64615888c529b3a07504d818518d" }
 workers_dev = true
 
 [build]
