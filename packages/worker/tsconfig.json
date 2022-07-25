@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["DOM.Iterable", "ESNext", "WebWorker"],
+    "types": [
+      "@cloudflare/workers-types"
+    ],
+    "moduleResolution": "node",
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src/**/*", "bindings.d.ts"],
+  "exclude": ["node_modules"]
+}

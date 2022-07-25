@@ -1,0 +1,69 @@
+{
+  "extends": "@tsconfig/svelte/tsconfig.json",
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "strict": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "lib": [
+      "esnext",
+      "dom",
+      "WebWorker"
+    ],
+    "types": [
+      "vite/client",
+      "svelte",
+    ],
+    "paths": {
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@common/*": [
+        "./src/common/*"
+      ],
+      "@routes/*": [
+        "./src/routes/*"
+      ],
+      "@helpers/*": [
+        "./src/helpers/*"
+      ],
+      "@database/*": [
+        "./src/database/*"
+      ],
+      "@workers/*": [
+        "./src/workers/*"
+      ],
+      "@stores/*": [
+        "./src/stores/*"
+      ],
+      "@ServiceWorker/*": [
+        "./src/ServiceWorker/*"
+      ],
+      "@icons/*": [
+        "./src/icons/*"
+      ],
+      "@Modals/*": [
+        "./src/components/Modals/*"
+      ]
+    }
+  },
+  "include": [
+    "node_modules/vite-plugin-worker/client.d.ts",
+    "node_modules/vite-plugin-pwa/client.d.ts",
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.svelte",
+    "src/main.js",
+    "src/lib/helpers/shimProcess.js",
+    "src/lib/helpers/hashHistory.js"
+  ],
+  "exclude": [
+    "dist"
+  ]
+}

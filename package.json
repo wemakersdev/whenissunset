@@ -1,0 +1,54 @@
+{
+  "name": "root",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Template",
+  "author": "GagnDeep",
+  "license": "MIT",
+  "main": "index.js",
+  "workspaces": [
+    "/packages/**"
+  ],
+  "engines": {
+    "node": ">16.0.0",
+    "pnpm": ">=6"
+  },
+  "scripts": {
+    "update-deps": "pnpm update -i -r --latest",
+    "preinstall": "only-allow pnpm",
+    "setup": "pnpm install",
+    "changelog": "echo 'generate master changelog' && conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md",
+    "changeset": "changeset",
+    "syncpack": "syncpack list-mismatches",
+    "build-specific-pkgs": "npm run build -w package-a && npm run build -w package-b",
+    "build-specific-pkgs-two": "npm run build-deps && npm run build -w package-c",
+    "build-via-npm": "npm run build -ws",
+    "build-via-pnpm": "pnpm run build -r",
+    "build-via-lerna": "lerna run build",
+    "build-a": "pnpm run build --filter testing-pnpm-package-a",
+    "build-pkgs": "pnpm run build --filter testing-pnpm-package-*",
+    "test": "pnpm test -r",
+    "publish": "pnpm publish -r",
+    "ci:version": "pnpm changelog && pnpx changeset version && pnpm install --no-frozen-lockfile && git add .",
+    "ci:publish": "pnpm build-pkgs && git status && pnpm publish -r && pnpm changeset tag",
+    "changeset-publish": "changeset publish",
+    "changeset-tag": "changeset tag",
+    "x": "node scripts/exec.js",
+    "dev": "concurrently \"pnpm x run client dev\" \"pnpm x run worker dev\"",
+    "deploy": "pnpm x run client build && pnpm x run worker publish"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.4.5",
+    "@changesets/cli": "^2.23.2",
+    "concurrently": "^7.3.0",
+    "conventional-changelog-cli": "^2.2.2",
+    "esm": "^3.2.25",
+    "lerna": "^5.1.8",
+    "microbundle": "^0.15.0",
+    "only-allow": "^1.1.1",
+    "servor": "^4.0.2",
+    "syncpack": "^6.2.0",
+    "uvu": "^0.5.2",
+    "watchlist": "^0.3.1"
+  }
+}

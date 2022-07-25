@@ -1,0 +1,21 @@
+name = "worker-typescript-template"
+type = "javascript"
+zone_id = "dc266d5d5ddaf8dfa8d3af6007d6f886"
+account_id = "dd7ff4ee0a586c3497954beb8207ba0c"
+compatibility_date = "2022-05-28"
+route = { pattern = "*domain.com/*", zone_id = "e2f8520a000382c1c0b71efd4a22882a" }
+workers_dev = true
+
+[build]
+command = "npm run build"
+[build.upload]
+format = "service-worker"
+
+[site]
+bucket = "./node_modules/@app/client/dist"
+entry-point="."
+
+
+[miniflare.globals]
+IS_DEV=true
+DEV_PORT=3000

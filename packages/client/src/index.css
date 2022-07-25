@@ -1,0 +1,35 @@
+*::-webkit-scrollbar-track {
+  border-radius: 6px;
+  background-color: theme('colors.base-200');
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+  background-color: theme('colors.base-200');
+}
+
+*::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background-color: theme('colors.base-100');
+}
+*::-webkit-scrollbar-thumb:hover {
+  border-radius: 10px;
+  background-color: theme('colors.white');
+  opacity: 0.3;
+  cursor: pointer;
+}
+
+html,
+body {
+  font-size: 16px;
+  height: 100%;
+  width: 100%;
+  overscroll-behavior-y: contain;
+  overflow:hidden; 
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
