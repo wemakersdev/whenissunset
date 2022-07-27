@@ -55,6 +55,8 @@
 </div>
 <div id="oceanRipple"></div>
 <script type="text/javascript">
+import { onMount } from 'svelte';
+
 import './sunsetBackgroundAnimation.css'
   var mouse = { x: 0, y: 0 };
   var myWidth = 0,
@@ -62,9 +64,18 @@ import './sunsetBackgroundAnimation.css'
   var mouseIsDown = false;
   var mouseIsDownDivision = false;
 
-  document.addEventListener(
-    "mousemove",
-    function(e) {
+  export let sunPos= [0, 0];
+
+
+  let canUpdate = false
+  onMount(() => {
+   canUpdate = true 
+  })
+  
+
+
+
+  function updateScene(e) {
       mouse.x = e.clientX || e.pageX;
       mouse.y = e.clientY || e.pageY;
       updateDimensions();
@@ -236,6 +247,12 @@ import './sunsetBackgroundAnimation.css'
         document.getElementById("darknessOverlay").style.height =
           (myHeight - mouse.y).toString() + "px";
       }
+    }
+
+  document.addEventListener(
+    "mousemove",
+    function(e) {
+     updateScene(e)
     },
     false
   );

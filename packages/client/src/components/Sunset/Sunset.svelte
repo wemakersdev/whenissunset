@@ -4,9 +4,11 @@
 	import SunsetAnimatedBackground from "./SunsetAnimatedBackground.svelte";
 	import { onMount } from "svelte";
 	import { networkLocation } from "@common/basicStores";
+	import {padStart} from 'lodash-es'
 
 	let timeStr: string = "00:00:00";
 	let current = dayjs();
+	let message: string = ""
 
 	const times = getTimes(
 		new Date(),
@@ -14,10 +16,22 @@
 		networkLocation.get()?.longitude || 0
 	);
 
-	const sunset = dayjs(times.sunset);
+	const sunset = dayjs(times.sunsetStart);
 	const sunrise = dayjs(times.sunrise);
 	const sunsetPos = getPosition(
 		times.sunrise,
+		networkLocation.get()?.latitude || 0,
+		networkLocation.get()?.longitude || 0
+	);
+	const sunrisePos = getPosition(
+		times.sunsetStart,
+		networkLocation.get()?.latitude || 0,
+		networkLocation.get()?.longitude || 0
+	);
+
+
+	const currentSunPos = getPosition(
+		current.toDate(),
 		networkLocation.get()?.latitude || 0,
 		networkLocation.get()?.longitude || 0
 	);
@@ -25,13 +39,21 @@
 	onMount(() => {
 		const handle = () => {
 			current = current.add(1, "second");
-			const diff = sunset.diff(current, "second");
+			const diffSunset = sunset.diff(current, "second");
+			const diffSunrise = sunrise.diff(current, "second");
+			const currentAction = diffSunset > diffSunrise ? "sunset" : "sunrise";
+
+
+
+			const diff = currentAction === "sunset" ? diffSunset : diffSunrise;
+
 
 			const seconds = diff % 60;
 			const minutes = Math.floor(diff / 60) % 60;
 			const hours = Math.floor(diff / 3600) % 24;
 
-			timeStr = `${hours}:${minutes}:${seconds}`;
+			timeStr = `${padStart(hours+"", 2, "0")}:${padStart(minutes+"", 2,"0")}:${padStart(seconds+"", 2, "0")}`;
+			message = `${currentAction} in`;
 		};
 		const intervalId = setInterval(handle, 1000);
 		handle();
@@ -41,11 +63,18 @@
 		};
 	});
 
-	console.log({sunsetPos})
+	// get x,y from azimuth and altitude
+	const getXY = (azimuth: number, altitude: number) => {
+		const x = Math.cos(altitude) * Math.cos(azimuth);
+		const y = Math.cos(altitude) * Math.sin(azimuth);
+		return { x, y };
+	};
+
+	const c = getXY(currentSunPos.azimuth, currentSunPos.altitude);
 </script>
 
 <div class="relative h-full w-full">
-	<SunsetAnimatedBackground />
+	<SunsetAnimatedBackground sunPos={[c.x, c.y]}/>
 
 	<div
 		style="z-index:100000"
@@ -54,13 +83,9 @@
 		<div
 			class="rounded-xl mb-64 flex flex-col gap-2 text-center text-base-content bg-opacity-50 bg-base-300 p-5 px-10"
 		>
-			<span class="">Sunset in</span>
+			<span class="">{message}</span>
 
 			<span class="text-5xl">{timeStr}</span>
-
-			<span>
-				azimuth: {sunsetPos.azimuth.toFixed(4)}°, altitude: {sunsetPos.altitude.toFixed(4)}°
-			</span>
 		</div>
 	</div>
 </div>
