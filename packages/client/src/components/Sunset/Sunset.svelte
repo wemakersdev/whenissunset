@@ -7,6 +7,7 @@
 	import { clamp, padStart, startCase } from "lodash-es";
 	import Compass from "@components/Compass/Compass.svelte";
 import { openModal } from "@components/Modals/controllers";
+import Unfold from "@icons/Unfold.svelte";
 	// import { f } from "msw/lib/glossary-297d38ba";
 
 	let timeStr: string = "00:00:00";
@@ -182,7 +183,11 @@ import { openModal } from "@components/Modals/controllers";
 		<div
 			class="rounded-xl mb-64 flex flex-col gap-2 text-center text-base-content bg-opacity-50 bg-base-300 p-5 px-10"
 		>
-			<span class="pointer-events-auto" role="button" on:click={handleClickMessage}>{startCase(message)}</span>
+			<span class="pointer-events-auto flex items-center justify-center " role="button" on:click={handleClickMessage}>
+				<span class="border-b border-opacity-60 border-base-content">
+					{startCase(message)}
+				</span>
+			</span>
 
 			<span class="text-5xl">{timeStr}</span>
 
@@ -194,7 +199,7 @@ import { openModal } from "@components/Modals/controllers";
 					/>
 				{:else}
 					<div>
-						<span>
+						<span class="">
 							{
 								currentAction === 'sunrise' ? 'In East' : 'In West'
 							}
