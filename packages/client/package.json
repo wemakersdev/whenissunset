@@ -2,8 +2,8 @@
   "name": "@app/client",
   "version": "0.0.1",
   "scripts": {
-    "dev": "concurrently \"yarn dev-sw\" \"vite --host\"",
-    "build": "yarn build-sw && vite build",
+    "dev": "concurrently \"vite --host\"",
+    "build": "yarn vite build",
     "serve": "vite preview",
     "generate-assets": "node ./scripts/generatePwaAssets.js",
     "dev-sw": "esbuild --define:import.meta.env.DEV=\"true\" --watch --bundle ./src/ServiceWorker/ServiceWorker.ts --outfile=./public/service-worker.js ",

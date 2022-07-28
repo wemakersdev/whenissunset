@@ -31,7 +31,7 @@
 
 <div class="flex items-center justify-center py-5">
 
-	<div style="transform: rotateZ({heading - radiansToDegrees(azimuth)}deg);" class="h-6 w-1 relative arrow bg-base-content">
+	<div style="transform: rotateZ({heading + radiansToDegrees(azimuth)}deg);" class="h-6 w-1 relative arrow bg-base-content">
 	
 	</div>
 </div>
