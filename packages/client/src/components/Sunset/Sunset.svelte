@@ -4,14 +4,18 @@
 	import SunsetAnimatedBackground from "./SunsetAnimatedBackground.svelte";
 	import { onMount } from "svelte";
 	import { networkLocation } from "@common/basicStores";
-	import { clamp, padStart } from "lodash-es";
+	import { clamp, padStart, startCase } from "lodash-es";
 	import Compass from "@components/Compass/Compass.svelte";
+import { openModal } from "@components/Modals/controllers";
 	// import { f } from "msw/lib/glossary-297d38ba";
 
 	let timeStr: string = "00:00:00";
 	let currentDate = dayjs();
 	let nextDate = dayjs().add(1, "day");
 	let message: string = "";
+	let currentAction: "sunset" | "sunrise" = "sunset";
+
+	let targetSunPos: any;
 
 	$: longitude = +($networkLocation?.longitude || 0);
 	$: latitude = +($networkLocation?.latitude || 0);
@@ -28,6 +32,7 @@
 	$: currentSunPos = getPosition(currentDate.toDate(), latitude, longitude);
 
 	$: timeStr = getTimeString(currentDate);
+
 	$: sunCoordinates = getXYFromAltitude(
 		currentSunPos.altitude,
 		currentSunPos.azimuth
@@ -48,8 +53,9 @@
 		let diffSunset = sunset.diff(currentDate, "second");
 		let diffSunrise = sunrise.diff(currentDate, "second");
 		let timeStr = "";
+		let t = times;
 		if (diffSunrise < 0) {
-			const t = getTimes(
+			t = getTimes(
 				currentDate.clone().add(1, "day").toDate(),
 				latitude,
 				longitude
@@ -59,7 +65,7 @@
 		}
 
 		if (diffSunset < 0) {
-			const t = getTimes(
+			t = getTimes(
 				currentDate.clone().add(1, "day").toDate(),
 				latitude,
 				longitude
@@ -68,9 +74,14 @@
 			diffSunset = sunset.diff(currentDate, "second");
 		}
 
-		const currentAction = diffSunset < diffSunrise ? "sunset" : "sunrise";
+		currentAction = diffSunset < diffSunrise ? "sunset" : "sunrise";
 
 		const diff = currentAction === "sunset" ? diffSunset : diffSunrise;
+
+		targetSunPos =
+			currentAction === "sunset"
+				? getPosition(t.sunset, latitude, longitude)
+				: getPosition(t.sunrise, latitude, longitude);
 
 		const seconds = diff % 60;
 		const minutes = Math.floor(diff / 60) % 60;
@@ -82,11 +93,8 @@
 			"0"
 		)}:${padStart(seconds + "", 2, "0")}`;
 		message = `${currentAction} in`;
-
 		return timeStr;
 	};
-
-
 
 	const getXYFromAltitude = (altitude: number, azimuth: number) => {
 		const windowHeight = window.innerHeight;
@@ -100,8 +108,12 @@
 		const altitudeAngle = interpolateAltitudeAngle(altitude);
 		const azimuthAngle = interpolateAzimuthAngle(azimuth);
 
-		let x = (4*radius * Math.cos(azimuthAngle) * (azimuth < 0 ? -1 : 1)) + halfWindowWidth;
-		let y = 4*radius * Math.sin(2*Math.PI - altitudeAngle) + halfWindowHeight;
+		let x =
+			4 * radius * Math.cos(azimuthAngle) * (azimuth < 0 ? -1 : 1) +
+			halfWindowWidth;
+		let y =
+			4 * radius * Math.sin(2 * Math.PI - altitudeAngle) +
+			halfWindowHeight *1.5;
 		return { x, y };
 	};
 
@@ -116,30 +128,49 @@
 	};
 
 	const interpolateAltitudeAngle = interpolate(
-		[-Math.PI/2, Math.PI/2],
-		[-Math.PI/2, Math.PI/2]
+		[-Math.PI / 2, Math.PI / 2],
+		[-Math.PI / 2, Math.PI / 2]
 	);
 
 	const interpolateAzimuthAngle = interpolate(
-		[-Math.PI*3/4, Math.PI * 3/4],
-		[-Math.PI /2, Math.PI/2]
+		[(-Math.PI * 3) / 4, (Math.PI * 3) / 4],
+		[-Math.PI / 2, Math.PI / 2]
 	);
 
-	const isDeviceOrientationSupported = () => {
-		return "DeviceOrientationEvent" in window;
+	const isDeviceOrientationSupported = (): Promise<boolean> => {
+		return new Promise((res, rej) => {
+			const handle = (event: DeviceOrientationEvent) => {
+				if(event.alpha || event.beta || event.gamma){
+					res(true);
+				}else{
+					res(false);	
+				}
+			}
+			window.addEventListener("deviceorientation", handle);
+			setTimeout(() => {
+				window.removeEventListener("deviceorientation", handle);
+				res(false);
+			}, 1000);
+		})
 	};
+
+	const handleClickMessage = () => {
+		openModal(() => import("@components/Modals/DisplayTimesModal.svelte"), {
+			times: times
+		})
+	}
 </script>
 
 <button
 	on:click={() => {
 		currentDate = currentDate.clone().add(1, "hour");
-	}}>add hour {currentDate.format("HH:mm:ss")}</button
+	}}>add hour</button
 >
 
 <button
 	on:click={() => {
 		currentDate = currentDate.clone().add(-1, "hour");
-	}}>sub hour {currentDate.format("HH:mm:ss")}</button
+	}}>sub hour</button
 >
 <div class="relative h-full w-full">
 	<SunsetAnimatedBackground x={sunCoordinates.x} y={sunCoordinates.y} />
@@ -151,16 +182,26 @@
 		<div
 			class="rounded-xl mb-64 flex flex-col gap-2 text-center text-base-content bg-opacity-50 bg-base-300 p-5 px-10"
 		>
-			<span class="">{message}</span>
+			<span class="pointer-events-auto" role="button" on:click={handleClickMessage}>{startCase(message)}</span>
 
 			<span class="text-5xl">{timeStr}</span>
 
-			{#if isDeviceOrientationSupported()}
-				<Compass
-					altitude={currentSunPos.altitude}
-					azimuth={currentSunPos.azimuth}
-				/>
-			{/if}
+			{#await isDeviceOrientationSupported() then isSupported}
+				{#if isSupported && targetSunPos}
+					<Compass
+						altitude={targetSunPos.altitude}
+						azimuth={targetSunPos.azimuth}
+					/>
+				{:else}
+					<div>
+						<span>
+							{
+								currentAction === 'sunrise' ? 'In East' : 'In West'
+							}
+						</span>
+					</div>
+				{/if}
+			{/await}
 		</div>
 	</div>
 </div>

@@ -30,7 +30,7 @@
 	</div>
 
 	{#if isModalOpen}
-		<div class="fixed inset-0">
+		<div class="fixed inset-0" style="z-index: 100000">
 			<slot name="modal" />
 		</div>
 	{/if}

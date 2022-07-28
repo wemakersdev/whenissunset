@@ -1,21 +1,21 @@
-<div id="starsContainer" onmousedown="startMove();" onmouseup="stopMove();">
-	<div id="stars" onmousedown="startMove();" onmouseup="stopMove();">
+<div id="starsContainer" >
+	<div id="stars" >
 	</div>
 </div>
 
-<div id="sun" onmousedown="startMove();" onmouseup="stopMove();">
+<div id="sun" >
 
 </div>
 
-<div id="sunDay" onmousedown="startMove();" onmouseup="stopMove();">
+<div id="sunDay" >
 
 </div>
 
-<div id="sunSet" onmousedown="startMove();" onmouseup="stopMove();">
+<div id="sunSet" >
 
 </div>
 
-<div id="sky" onmousedown="startMove();" onmouseup="stopMove();">
+<div id="sky" >
 
 </div>
 
@@ -25,31 +25,31 @@
 <div class="star" style="right: 80px; top: 45px;"></div>
 <div class="star" style="right: 120px; top: 20px;"></div>
 
-<div id="horizon" onmousedown="startMove();" onmouseup="stopMove();"></div>
+<div id="horizon" ></div>
 
-<div id="horizonNight" onmousedown="startMove();" onmouseup="stopMove();"></div>
+<div id="horizonNight" ></div>
 
-<div id="moon" onmousedown="startMove();" onmouseup="stopMove();"></div>
+<div id="moon" ></div>
 
 <div id="mountainRange">
-	<div id="mountain" onmousedown="startMove();" onmouseup="stopMove();">
+	<div id="mountain" >
 	</div>
 
 </div>
 
-<div id="division" onmousedown="startDraggingDivision();" onmouseup="stopMove();">
+<div id="division" >
 
 </div>
 
-<div id="water" onmousedown="startMove();" onmouseup="stopMove();"></div>
+<div id="water" ></div>
 
-<div id="waterReflectionContainer" onmousedown="startMove();" onmouseup="stopMove();">
-	<div id="waterReflectionMiddle" onmousedown="startMove();" onmouseup="stopMove();">
+<div id="waterReflectionContainer" >
+	<div id="waterReflectionMiddle" >
 
 	</div>
 </div>
-<div id="waterDistance" onmousedown="startMove();" onmouseup="stopMove();"></div>
-<div id="darknessOverlaySky" onmousedown="startMove();" onmouseup="stopMove();"></div>
+<div id="waterDistance" ></div>
+<div id="darknessOverlaySky" ></div>
 <div id="darknessOverlay"></div>
 <div id="oceanRippleContainer">
 </div>
