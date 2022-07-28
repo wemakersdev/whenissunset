@@ -64,14 +64,21 @@ import './sunsetBackgroundAnimation.css'
   var mouseIsDown = false;
   var mouseIsDownDivision = false;
 
-  export let sunPos= [0, 0];
-
+  export let x = 0;
+  export let y = 0;
 
   let canUpdate = false
   onMount(() => {
    canUpdate = true 
   })
   
+
+  $: if (canUpdate) {
+    updateScene({
+      clientX: x,
+      clientY: y
+    })
+  }
 
 
 
@@ -249,13 +256,13 @@ import './sunsetBackgroundAnimation.css'
       }
     }
 
-  document.addEventListener(
-    "mousemove",
-    function(e) {
-     updateScene(e)
-    },
-    false
-  );
+  // document.addEventListener(
+  //   "mousemove",
+  //   function(e) {
+  //    updateScene(e)
+  //   },
+  //   false
+  // );
 
   function updateDimensions() {
     if (typeof window.innerWidth == "number") {

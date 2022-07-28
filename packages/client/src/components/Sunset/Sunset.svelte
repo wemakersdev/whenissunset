@@ -1,80 +1,148 @@
 <script lang="ts">
 	import { getTimes, getPosition } from "suncalc";
-	import dayjs from "dayjs";
+	import dayjs, { Dayjs } from "dayjs";
 	import SunsetAnimatedBackground from "./SunsetAnimatedBackground.svelte";
 	import { onMount } from "svelte";
 	import { networkLocation } from "@common/basicStores";
-	import {padStart} from 'lodash-es'
+	import { clamp, padStart } from "lodash-es";
+	import Compass from "@components/Compass/Compass.svelte";
+	// import { f } from "msw/lib/glossary-297d38ba";
 
 	let timeStr: string = "00:00:00";
-	let current = dayjs();
-	let message: string = ""
+	let currentDate = dayjs();
+	let nextDate = dayjs().add(1, "day");
+	let message: string = "";
 
-	const times = getTimes(
-		new Date(),
-		networkLocation.get()?.latitude || 0,
-		networkLocation.get()?.longitude || 0
-	);
+	$: longitude = +($networkLocation?.longitude || 0);
+	$: latitude = +($networkLocation?.latitude || 0);
 
-	const sunset = dayjs(times.sunsetStart);
-	const sunrise = dayjs(times.sunrise);
-	const sunsetPos = getPosition(
-		times.sunrise,
-		networkLocation.get()?.latitude || 0,
-		networkLocation.get()?.longitude || 0
-	);
-	const sunrisePos = getPosition(
-		times.sunsetStart,
-		networkLocation.get()?.latitude || 0,
-		networkLocation.get()?.longitude || 0
-	);
+	$: times = getTimes(currentDate.toDate(), latitude, longitude);
 
+	$: timesNextDate = getTimes(nextDate.toDate(), latitude, longitude);
 
-	const currentSunPos = getPosition(
-		current.toDate(),
-		networkLocation.get()?.latitude || 0,
-		networkLocation.get()?.longitude || 0
+	$: sunset = dayjs(times.sunsetStart);
+	$: sunrise = dayjs(times.sunrise);
+	$: sunsetNextDate = dayjs(timesNextDate.sunsetStart);
+	$: sunriseNextDate = dayjs(timesNextDate.sunrise);
+
+	$: currentSunPos = getPosition(currentDate.toDate(), latitude, longitude);
+
+	$: timeStr = getTimeString(currentDate);
+	$: sunCoordinates = getXYFromAltitude(
+		currentSunPos.altitude,
+		currentSunPos.azimuth
 	);
 
 	onMount(() => {
 		const handle = () => {
-			current = current.add(1, "second");
-			const diffSunset = sunset.diff(current, "second");
-			const diffSunrise = sunrise.diff(current, "second");
-			const currentAction = diffSunset > diffSunrise ? "sunset" : "sunrise";
-
-
-
-			const diff = currentAction === "sunset" ? diffSunset : diffSunrise;
-
-
-			const seconds = diff % 60;
-			const minutes = Math.floor(diff / 60) % 60;
-			const hours = Math.floor(diff / 3600) % 24;
-
-			timeStr = `${padStart(hours+"", 2, "0")}:${padStart(minutes+"", 2,"0")}:${padStart(seconds+"", 2, "0")}`;
-			message = `${currentAction} in`;
+			currentDate = currentDate.clone().add(1, "second");
 		};
 		const intervalId = setInterval(handle, 1000);
 		handle();
-
 		return () => {
 			clearInterval(intervalId);
 		};
 	});
 
-	// get x,y from azimuth and altitude
-	const getXY = (azimuth: number, altitude: number) => {
-		const x = Math.cos(altitude) * Math.cos(azimuth);
-		const y = Math.cos(altitude) * Math.sin(azimuth);
+	const getTimeString = (currentDate: Dayjs) => {
+		let diffSunset = sunset.diff(currentDate, "second");
+		let diffSunrise = sunrise.diff(currentDate, "second");
+		let timeStr = "";
+		if (diffSunrise < 0) {
+			const t = getTimes(
+				currentDate.clone().add(1, "day").toDate(),
+				latitude,
+				longitude
+			);
+			const sunrise = dayjs(t.sunrise);
+			diffSunrise = sunrise.diff(currentDate, "second");
+		}
+
+		if (diffSunset < 0) {
+			const t = getTimes(
+				currentDate.clone().add(1, "day").toDate(),
+				latitude,
+				longitude
+			);
+			const sunset = dayjs(t.sunset);
+			diffSunset = sunset.diff(currentDate, "second");
+		}
+
+		const currentAction = diffSunset < diffSunrise ? "sunset" : "sunrise";
+
+		const diff = currentAction === "sunset" ? diffSunset : diffSunrise;
+
+		const seconds = diff % 60;
+		const minutes = Math.floor(diff / 60) % 60;
+		const hours = Math.floor(diff / 3600) % 24;
+
+		timeStr = `${padStart(hours + "", 2, "0")}:${padStart(
+			minutes + "",
+			2,
+			"0"
+		)}:${padStart(seconds + "", 2, "0")}`;
+		message = `${currentAction} in`;
+
+		return timeStr;
+	};
+
+
+
+	const getXYFromAltitude = (altitude: number, azimuth: number) => {
+		const windowHeight = window.innerHeight;
+		const windowWidth = window.innerWidth;
+
+		const halfWindowHeight = windowHeight / 2;
+		const halfWindowWidth = windowWidth / 2;
+
+		const radius = Math.min(halfWindowHeight, halfWindowWidth) * 0.5;
+
+		const altitudeAngle = interpolateAltitudeAngle(altitude);
+		const azimuthAngle = interpolateAzimuthAngle(azimuth);
+
+		let x = (4*radius * Math.cos(azimuthAngle) * (azimuth < 0 ? -1 : 1)) + halfWindowWidth;
+		let y = 4*radius * Math.sin(2*Math.PI - altitudeAngle) + halfWindowHeight;
 		return { x, y };
 	};
 
-	const c = getXY(currentSunPos.azimuth, currentSunPos.altitude);
+	const interpolate = (
+		[minX, maxX]: [number, number],
+		[minY, maxY]: [number, number]
+	) => {
+		var slope = (maxY - minY) / (maxX - minX);
+		return (x: number) => {
+			return (x - minX) * slope + minY;
+		};
+	};
+
+	const interpolateAltitudeAngle = interpolate(
+		[-Math.PI/2, Math.PI/2],
+		[-Math.PI/2, Math.PI/2]
+	);
+
+	const interpolateAzimuthAngle = interpolate(
+		[-Math.PI*3/4, Math.PI * 3/4],
+		[-Math.PI /2, Math.PI/2]
+	);
+
+	const isDeviceOrientationSupported = () => {
+		return "DeviceOrientationEvent" in window;
+	};
 </script>
 
+<button
+	on:click={() => {
+		currentDate = currentDate.clone().add(1, "hour");
+	}}>add hour {currentDate.format("HH:mm:ss")}</button
+>
+
+<button
+	on:click={() => {
+		currentDate = currentDate.clone().add(-1, "hour");
+	}}>sub hour {currentDate.format("HH:mm:ss")}</button
+>
 <div class="relative h-full w-full">
-	<SunsetAnimatedBackground sunPos={[c.x, c.y]}/>
+	<SunsetAnimatedBackground x={sunCoordinates.x} y={sunCoordinates.y} />
 
 	<div
 		style="z-index:100000"
@@ -86,6 +154,13 @@
 			<span class="">{message}</span>
 
 			<span class="text-5xl">{timeStr}</span>
+
+			{#if isDeviceOrientationSupported()}
+				<Compass
+					altitude={currentSunPos.altitude}
+					azimuth={currentSunPos.azimuth}
+				/>
+			{/if}
 		</div>
 	</div>
 </div>
