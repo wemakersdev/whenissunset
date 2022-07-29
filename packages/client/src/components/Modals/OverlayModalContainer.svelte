@@ -44,3 +44,12 @@
     @apply absolute top-0 left-0 right-0 z-20;
   }
 </style>
+
+
+<svelte:window
+  on:keydown={(e) => {
+    if (e.key === "Escape") {
+      close()
+    }
+  }}
+/>
