@@ -40,7 +40,7 @@
 					{startCase(key)}  
 				</span>
 				<span class="w-1/2">
-					{item.format("h:mm A")}, {item.startOf("day").day() !== currentDate.startOf("day").day() ? "Tomorrow" : ""}
+					{item.format("h:mm A")}{item.startOf("day").day() !== currentDate.startOf("day").day() ? ", Tomorrow" : ""}
 				</span>
 			</div>
 		{/each}
