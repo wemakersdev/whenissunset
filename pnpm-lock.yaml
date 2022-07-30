@@ -38,6 +38,7 @@ importers:
       '@tailwindcss/typography': ^0.5.4
       '@tsconfig/svelte': ^3.0.0
       '@types/lodash-es': ^4.17.6
+      '@types/motion-sensors-polyfill': ^0.3.1
       '@types/suncalc': ^1.8.1
       autoprefixer: ^10.4.7
       color: ^4.2.3
@@ -45,6 +46,7 @@ importers:
       dayjs: ^1.11.4
       esbuild: ^0.14.49
       lodash-es: ^4.17.21
+      motion-sensors-polyfill: ^0.3.1
       msw: ^0.44.2
       overmind: ^28.0.1
       overmind-svelte: ^5.0.1
@@ -73,11 +75,13 @@ importers:
       worker-rpc: ^0.2.0
     dependencies:
       '@types/lodash-es': 4.17.6
+      '@types/motion-sensors-polyfill': 0.3.1
       '@types/suncalc': 1.8.1
       color: 4.2.3
       dayjs: 1.11.4
       esbuild: 0.14.49
       lodash-es: 4.17.21
+      motion-sensors-polyfill: 0.3.1
       msw: 0.44.2_typescript@4.6.4
       overmind: 28.0.1
       overmind-svelte: 5.0.1
@@ -3458,6 +3462,10 @@ packages:
 
   /@types/minimist/1.2.2:
     resolution: {integrity: sha512-jhuKLIRrhvCPLqwPcx6INqmKeiA5EWrsCOPhrlFSrbrmU4ZMPjj5Ul/oLCMDO98XRUIwVm78xICz4EPCektzeQ==}
+
+  /@types/motion-sensors-polyfill/0.3.1:
+    resolution: {integrity: sha512-bRj35fP3tT7T9u2y6EGCUL7z4oeQKWPrMUr9HGbyV50ui9eFUl3dcmIrcUnZjM+NTuUV9XWWnaZdCjU0XLRkCw==}
+    dev: false
 
   /@types/ms/0.7.31:
     resolution: {integrity: sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==}
@@ -8791,6 +8799,10 @@ packages:
     resolution: {integrity: sha512-xV2bxeN6F7oYjZWTe/YPAy6MN2M+sL4u/Rlm2AHCIVGfo2p1yGmBHQ6vHehl4bRTZBdHu3TSkWdYgkwpYzAGSw==}
     engines: {node: '>=0.10.0'}
     dev: true
+
+  /motion-sensors-polyfill/0.3.1:
+    resolution: {integrity: sha512-xUmPVmAwNTGc2gbcf2Ww3tVPcpdozPERy8egAHSCwk8gO4lp6JkpeQBItUB5h0uslxB2llU4I9EHt65SErr52A==}
+    dev: false
 
   /mri/1.2.0:
     resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}
