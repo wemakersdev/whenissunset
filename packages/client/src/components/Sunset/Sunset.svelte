@@ -141,7 +141,8 @@ import Unfold from "@icons/Unfold.svelte";
 	const isDeviceOrientationSupported = (): Promise<boolean> => {
 		return new Promise((res, rej) => {
 			const handle = (event: DeviceOrientationEvent) => {
-				if(event.alpha || event.beta || event.gamma){
+				//@ts-ignore
+				if(event.alpha || event.beta || event.gamma || event.webkitCompassHeading) {
 					res(true);
 				}else{
 					res(false);	
