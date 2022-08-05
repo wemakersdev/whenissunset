@@ -1,8 +1,11 @@
 <script>
 	import Circle3 from 'svelte-loading-spinners/dist/Circle3.svelte'
 
-	export let color = "rgb(234 179 8 / var(--tw-bg-opacity))"
+	export let color = "hsla(var(--bc))"
 	export let size = 20
+
+	$: console.log({color})
+	
 </script>
 
 <Circle3 
