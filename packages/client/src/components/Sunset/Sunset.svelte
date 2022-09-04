@@ -163,7 +163,7 @@ import Unfold from "@icons/Unfold.svelte";
 	}
 </script>
 
-<button
+<!-- <button
 	on:click={() => {
 		currentDate = currentDate.clone().add(1, "hour");
 	}}>add hour</button
@@ -173,7 +173,7 @@ import Unfold from "@icons/Unfold.svelte";
 	on:click={() => {
 		currentDate = currentDate.clone().add(-1, "hour");
 	}}>sub hour</button
->
+> -->
 <div class="relative h-full w-full">
 	<SunsetAnimatedBackground x={sunCoordinates.x} y={sunCoordinates.y} />
 
