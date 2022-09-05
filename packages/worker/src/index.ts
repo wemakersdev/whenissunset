@@ -265,6 +265,12 @@ self.addEventListener('fetch', (event) => {
   const fetchEvent = event as FetchEvent;
   const url = new URL(fetchEvent.request.url);
 
+  if(url.host.startsWith("www.")){
+    const res = Response.redirect(url.toString().replace("www.", ""), 301)
+    fetchEvent.respondWith(res)
+    return;
+  }
+
   if (url.pathname.startsWith("/api")) {
     fetchEvent.respondWith(handleRequest(fetchEvent.request));
   } else {
