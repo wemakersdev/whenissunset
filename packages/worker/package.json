@@ -43,7 +43,7 @@
     "tslint-config-prettier": "^1.18.0",
     "tslint-eslint-rules": "^5.4.0",
     "tslint-plugin-prettier": "^2.3.0",
-    "wrangler": "^2.0.15"
+    "wrangler": "^2.19.0"
   },
   "dependencies": {
     "@app/client": "workspace:^0.0.1",

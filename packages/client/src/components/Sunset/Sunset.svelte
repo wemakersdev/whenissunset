@@ -1,213 +1,139 @@
 <script lang="ts">
-	import { getTimes, getPosition } from "suncalc";
-	import dayjs, { Dayjs } from "dayjs";
-	import SunsetAnimatedBackground from "./SunsetAnimatedBackground.svelte";
-	import { onMount } from "svelte";
-	import { networkLocation } from "@common/basicStores";
-	import { clamp, padStart, startCase } from "lodash-es";
-	import Compass from "@components/Compass/Compass.svelte";
-import { openModal } from "@components/Modals/controllers";
-import Unfold from "@icons/Unfold.svelte";
-	// import { f } from "msw/lib/glossary-297d38ba";
+ 
+  import dayjs, { Dayjs } from "dayjs";
+  import { onMount } from "svelte";
+  import { networkLocation } from "@common/basicStores";
+  import {padStart, startCase } from "lodash-es";
+  import Compass from "@components/Compass/Compass.svelte";
+  import { openModal } from "@components/Modals/controllers";
+  import { muslimPrayerTimes } from "@common/prayerTimes";
+  import { getFormattedPrayerTimes, getPrayerTimes } from "@common/adhan";
+  // import { f } from "msw/lib/glossary-297d38ba";
 
-	let timeStr: string = "00:00:00";
-	let currentDate = dayjs();
-	let nextDate = dayjs().add(1, "day");
-	let message: string = "";
-	let currentAction: "sunset" | "sunrise" = "sunset";
 
-	let targetSunPos: any;
+  let timeStr: string = "00:00:00";
+  let currentDate = dayjs();
+  let nextDate = dayjs().add(1, "day");
+  let message: string = "";
 
-	$: longitude = +($networkLocation?.longitude || 0);
-	$: latitude = +($networkLocation?.latitude || 0);
+  let targetSunPos: any;
+  const meccaLatitude = 21.4225;
+const meccaLongitude = 39.8262;
 
-	$: times = getTimes(currentDate.toDate(), latitude, longitude);
+  $: longitude = +($networkLocation?.longitude || 0);
+  $: latitude = +($networkLocation?.latitude || 0);
 
-	$: timesNextDate = getTimes(nextDate.toDate(), latitude, longitude);
+  
 
-	$: sunset = dayjs(times.sunsetStart);
-	$: sunrise = dayjs(times.sunrise);
-	$: sunsetNextDate = dayjs(timesNextDate.sunsetStart);
-	$: sunriseNextDate = dayjs(timesNextDate.sunrise);
+  $: timeStr = getTimeString(currentDate);
 
-	$: currentSunPos = getPosition(currentDate.toDate(), latitude, longitude);
 
-	$: timeStr = getTimeString(currentDate);
+  $: prayerTimes =getPrayerTimes({
+    calculationMethod: "Dubai",
+    date: currentDate,
+    coordinates: {
+      latitude: latitude,
+      longitude: longitude,
+    },
+    timeZone: "Asia/Dubai",
+  })
+  $: currentPrayer = prayerTimes?.currentPrayer();
+  $: currentPrayerDate = currentPrayer !== "none" ? dayjs(prayerTimes[currentPrayer]): undefined;
+  $: nextPrayer = prayerTimes?.nextPrayer();
+  $: nextPrayerDate = nextPrayer !== "none" ? dayjs(prayerTimes[nextPrayer]): undefined;
+  $: currentAction = nextPrayer;
 
-	$: sunCoordinates = getXYFromAltitude(
-		currentSunPos.altitude,
-		currentSunPos.azimuth
-	);
+  onMount(() => {
+    const handle = () => {
+      currentDate = currentDate.clone().add(1, "second");
+    };
+    const intervalId = setInterval(handle, 1000);
+    handle();
+    return () => {
+      clearInterval(intervalId);
+    };
+  });
 
-	onMount(() => {
-		const handle = () => {
-			currentDate = currentDate.clone().add(1, "second");
-		};
-		const intervalId = setInterval(handle, 1000);
-		handle();
-		return () => {
-			clearInterval(intervalId);
-		};
-	});
 
-	const getTimeString = (currentDate: Dayjs) => {
-		let diffSunset = sunset.diff(currentDate, "second");
-		let diffSunrise = sunrise.diff(currentDate, "second");
-		let timeStr = "";
-		let t = times;
-		if (diffSunrise < 0) {
-			t = getTimes(
-				currentDate.clone().add(1, "day").toDate(),
-				latitude,
-				longitude
-			);
-			const sunrise = dayjs(t.sunrise);
-			diffSunrise = sunrise.diff(currentDate, "second");
-		}
+  const getTimeString = (currentDate: Dayjs) => {
+    let diff = nextPrayerDate?.diff(currentDate, "second") || 0;
 
-		if (diffSunset < 0) {
-			t = getTimes(
-				currentDate.clone().add(1, "day").toDate(),
-				latitude,
-				longitude
-			);
-			const sunset = dayjs(t.sunset);
-			diffSunset = sunset.diff(currentDate, "second");
-		}
+    let timeStr = "";
 
-		currentAction = diffSunset < diffSunrise ? "sunset" : "sunrise";
+    const seconds = diff % 60;
+    const minutes = Math.floor(diff / 60) % 60;
+    const hours = Math.floor(diff / 3600) % 24;
 
-		const diff = currentAction === "sunset" ? diffSunset : diffSunrise;
+    timeStr = `${padStart(hours + "", 2, "0")}:${padStart(
+      minutes + "",
+      2,
+      "0"
+    )}:${padStart(seconds + "", 2, "0")}`;
+    message = `${currentAction} in`;
+    return timeStr;
+  };
 
-		targetSunPos =
-			currentAction === "sunset"
-				? getPosition(t.sunset, latitude, longitude)
-				: getPosition(t.sunrise, latitude, longitude);
+  
 
-		const seconds = diff % 60;
-		const minutes = Math.floor(diff / 60) % 60;
-		const hours = Math.floor(diff / 3600) % 24;
+  const isDeviceOrientationSupported = (): Promise<boolean> => {
+    return new Promise((res, rej) => {
+      const handle = (event: DeviceOrientationEvent) => {
+        //@ts-ignore
+        if (
+          event.alpha ||
+          event.beta ||
+          event.gamma ||
+          (event as any).webkitCompassHeading
+        ) {
+          res(true);
+        } else {
+          res(false);
+        }
+      };
+      window.addEventListener("deviceorientation", handle);
+      setTimeout(() => {
+        window.removeEventListener("deviceorientation", handle);
+        res(false);
+      }, 1000);
+    });
+  };
 
-		timeStr = `${padStart(hours + "", 2, "0")}:${padStart(
-			minutes + "",
-			2,
-			"0"
-		)}:${padStart(seconds + "", 2, "0")}`;
-		message = `${currentAction} in`;
-		return timeStr;
-	};
-
-	const getXYFromAltitude = (altitude: number, azimuth: number) => {
-		const windowHeight = window.innerHeight;
-		const windowWidth = window.innerWidth;
-
-		const halfWindowHeight = windowHeight / 2;
-		const halfWindowWidth = windowWidth / 2;
-
-		const radius = Math.min(halfWindowHeight, halfWindowWidth) * 0.5;
-
-		const altitudeAngle = interpolateAltitudeAngle(altitude);
-		const azimuthAngle = interpolateAzimuthAngle(azimuth);
-
-		let x =
-			4 * radius * Math.cos(azimuthAngle) * (azimuth < 0 ? -1 : 1) +
-			halfWindowWidth;
-		let y =
-			4 * radius * Math.sin(2 * Math.PI - altitudeAngle) +
-			halfWindowHeight *1.5;
-		return { x, y };
-	};
-
-	const interpolate = (
-		[minX, maxX]: [number, number],
-		[minY, maxY]: [number, number]
-	) => {
-		var slope = (maxY - minY) / (maxX - minX);
-		return (x: number) => {
-			return (x - minX) * slope + minY;
-		};
-	};
-
-	const interpolateAltitudeAngle = interpolate(
-		[-Math.PI / 2, Math.PI / 2],
-		[-Math.PI / 2, Math.PI / 2]
-	);
-
-	const interpolateAzimuthAngle = interpolate(
-		[(-Math.PI * 3) / 4, (Math.PI * 3) / 4],
-		[-Math.PI / 2, Math.PI / 2]
-	);
-
-	const isDeviceOrientationSupported = (): Promise<boolean> => {
-		return new Promise((res, rej) => {
-			const handle = (event: DeviceOrientationEvent) => {
-				//@ts-ignore
-				if(event.alpha || event.beta || event.gamma || event.webkitCompassHeading) {
-					res(true);
-				}else{
-					res(false);	
-				}
-			}
-			window.addEventListener("deviceorientation", handle);
-			setTimeout(() => {
-				window.removeEventListener("deviceorientation", handle);
-				res(false);
-			}, 1000);
-		})
-	};
-
-	const handleClickMessage = () => {
-		openModal(() => import("@components/Modals/DisplayTimesModal.svelte"), {
-			times: times
-		})
-	}
+  const handleClickMessage = () => {
+    openModal(() => import("@components/Modals/DisplayTimesModal.svelte"), {
+      times: getFormattedPrayerTimes(prayerTimes),
+    });
+  };
 </script>
 
-<!-- <button
-	on:click={() => {
-		currentDate = currentDate.clone().add(1, "hour");
-	}}>add hour</button
->
 
-<button
-	on:click={() => {
-		currentDate = currentDate.clone().add(-1, "hour");
-	}}>sub hour</button
-> -->
 <div class="relative h-full w-full">
-	<SunsetAnimatedBackground x={sunCoordinates.x} y={sunCoordinates.y} />
+  <div
+    style="z-index:100000"
+    class="absolute inset-0 pointer-events-none w-full flex items-center justify-center"
+  >
+    <div
+      class="rounded-xl mb-64 flex flex-col gap-2 text-center text-base-content bg-opacity-50 bg-base-300 p-5 px-10"
+    >
+      <span
+        class="pointer-events-auto flex items-center justify-center"
+        role="button"
+        on:click={handleClickMessage}
+      >
+        <span class="border-b border-opacity-60 border-base-content">
+          {startCase(message)}
+        </span>
+      </span>
 
-	<div
-		style="z-index:100000"
-		class="absolute inset-0 pointer-events-none w-full flex items-center justify-center"
-	>
-		<div
-			class="rounded-xl mb-64 flex flex-col gap-2 text-center text-base-content bg-opacity-50 bg-base-300 p-5 px-10"
-		>
-			<span class="pointer-events-auto flex items-center justify-center " role="button" on:click={handleClickMessage}>
-				<span class="border-b border-opacity-60 border-base-content">
-					{startCase(message)}
-				</span>
-			</span>
+      <span class="text-5xl">{timeStr}</span>
 
-			<span class="text-5xl">{timeStr}</span>
-
-			{#await isDeviceOrientationSupported() then isSupported}
-				{#if isSupported && targetSunPos}
-					<Compass
-						altitude={targetSunPos.altitude}
-						azimuth={targetSunPos.azimuth}
-					/>
-				{:else}
-					<div>
-						<span class="">
-							{
-								currentAction === 'sunrise' ? 'In East' : 'In West'
-							}
-						</span>
-					</div>
-				{/if}
-			{/await}
-		</div>
-	</div>
+      {#await isDeviceOrientationSupported() then isSupported}
+        {#if isSupported && targetSunPos}
+          <Compass
+            altitude={targetSunPos.altitude}
+            azimuth={targetSunPos.azimuth}
+          />
+        {/if}
+      {/await}
+    </div>
+  </div>
 </div>

@@ -1,9 +1,9 @@
-name = "whenisthesunset"
+name = "meccaway"
 type = "javascript"
-zone_id = "a16c64615888c529b3a07504d818518d"
+zone_id = "6f51700bac8ce9fee8597c3fe1245585"
 account_id = "dd7ff4ee0a586c3497954beb8207ba0c"
 compatibility_date = "2022-05-28"
-route = { pattern = "*whenisthesunset.com/*", zone_id = "a16c64615888c529b3a07504d818518d" }
+route = { pattern = "*meccaway.com/*", zone_id = "6f51700bac8ce9fee8597c3fe1245585" }
 workers_dev = true
 
 [build]
