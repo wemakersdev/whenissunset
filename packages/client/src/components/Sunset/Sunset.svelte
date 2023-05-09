@@ -8,6 +8,7 @@
   import { openModal } from "@components/Modals/controllers";
   import { muslimPrayerTimes } from "@common/prayerTimes";
   import { getFormattedPrayerTimes, getPrayerTimes } from "@common/adhan";
+  import { calculateAzimuthAndAltitude } from "@common/azimuth";
   // import { f } from "msw/lib/glossary-297d38ba";
 
 
@@ -17,11 +18,19 @@
   let message: string = "";
 
   let targetSunPos: any;
-  const meccaLatitude = 21.4225;
-const meccaLongitude = 39.8262;
+  const meccaLatitude =  21.422487;
+const meccaLongitude =39.826206;
 
   $: longitude = +($networkLocation?.longitude || 0);
   $: latitude = +($networkLocation?.latitude || 0);
+
+  $: meccaPos = calculateAzimuthAndAltitude({
+    latitude: latitude,
+    longitude: longitude,
+  }, {
+    latitude: meccaLatitude,
+    longitude: meccaLongitude,
+  })
 
   
 
@@ -69,7 +78,7 @@ const meccaLongitude = 39.8262;
       2,
       "0"
     )}:${padStart(seconds + "", 2, "0")}`;
-    message = `${currentAction} in`;
+    message = `${currentAction}`;
     return timeStr;
   };
 
@@ -109,28 +118,33 @@ const meccaLongitude = 39.8262;
 <div class="relative h-full w-full">
   <div
     style="z-index:100000"
-    class="absolute inset-0 pointer-events-none w-full flex items-center justify-center"
+    class="absolute inset-0  bg-gradient-to-r from-gray-800 via-gray-900 to-black  pointer-events-none w-full flex items-center justify-center"
   >
     <div
-      class="rounded-xl mb-64 flex flex-col gap-2 text-center text-base-content bg-opacity-50 bg-base-300 p-5 px-10"
+      class="rounded-xl flex flex-col gap-2 text-center text-base-content bg-opacity-50 p-5 px-10"
+
+      
     >
       <span
-        class="pointer-events-auto flex items-center justify-center"
+        class="pointer-events-auto flex mb-2 items-center justify-center"
         role="button"
         on:click={handleClickMessage}
       >
-        <span class="border-b border-opacity-60 border-base-content">
-          {startCase(message)}
+        <span class="border-b border-opacity-60 text-2xl border-base-content">
+          {startCase(message)} at
         </span>
       </span>
 
-      <span class="text-5xl">{timeStr}</span>
+      <span class="text-5xl md:text-8xl  font-extrabold">
+        {nextPrayerDate?.format("hh:mm A")} 
+      </span>
+      <span class="text-lg md:text-2xl">{timeStr}</span>
 
       {#await isDeviceOrientationSupported() then isSupported}
-        {#if isSupported && targetSunPos}
+        {#if isSupported}
           <Compass
-            altitude={targetSunPos.altitude}
-            azimuth={targetSunPos.azimuth}
+            altitude={meccaPos.altitude}
+            azimuth={meccaPos.azimuth}
           />
         {/if}
       {/await}

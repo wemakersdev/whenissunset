@@ -4,11 +4,11 @@
   import dayjs, { type Dayjs } from "dayjs";
   import { startCase } from "lodash-es";
   import { muslimPrayerTimes } from "@common/prayerTimes";
+  import type { getFormattedPrayerTimes } from "@common/adhan";
 
-  export let times: GetTimesResult;
+  export let times: ReturnType<typeof getFormattedPrayerTimes>;
 
   let currentDate = dayjs();
-
 
   $: timesMap = Object.entries(times)
     .map(([key, value]) => {
@@ -34,10 +34,9 @@
   <div class="h-full w-full overflow-auto">
     <div class="flex flex-col gap-1">
       {#each timesMap as [key, item]}
-		{#if muslimPrayerTimes[key]}
         <div class="flex flex-row bg-base-200 px-4 py-2 rounded-lg">
           <span class="w-1/2">
-            {muslimPrayerTimes[key]}
+            {key}
           </span>
           <span class="w-1/2">
             {item.format("h:mm A")}{item.startOf("day").day() !==
@@ -46,7 +45,6 @@
               : ""}
           </span>
         </div>
-		{/if}
       {/each}
     </div>
   </div>
